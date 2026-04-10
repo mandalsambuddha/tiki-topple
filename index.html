@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🗿 Tiki Topple</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --jungle: #1a3a1a;
+    --jungle2: #0f2a0f;
+    --sand: #f5d87a;
+    --sand2: #e8c55a;
+    --fire: #ff6b1a;
+    --fire2: #ff4400;
+    --teal: #00c9a7;
+    --wood: #8B5E3C;
+    --wood2: #6b4226;
+    --leaf: #2d7a2d;
+    --stone: #4a5568;
+    --white: #fff8f0;
+    --track-w: 90px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--jungle2);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── STARS BG ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(255,180,50,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(0,200,160,0.06) 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── SCREEN SYSTEM ── */
+  .screen { display: none; position: relative; z-index: 1; }
+  .screen.active { display: flex; }
+
+  /* ══════════════════════════════════
+     LOBBY SCREEN
+  ══════════════════════════════════ */
+  #lobby {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    gap: 0;
+  }
+
+  .logo {
+    font-family: 'Boogaloo', cursive;
+    font-size: clamp(3rem, 10vw, 6rem);
+    color: var(--sand);
+    text-shadow: 4px 4px 0 var(--wood2), 0 0 40px rgba(255,180,50,0.4);
+    letter-spacing: 2px;
+    line-height: 1;
+    margin-bottom: 0.2em;
+    animation: logoFloat 3s ease-in-out infinite;
+  }
+  @keyframes logoFloat {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .logo-sub {
+    font-family: 'Boogaloo', cursive;
+    font-size: clamp(0.9rem, 3vw, 1.3rem);
+    color: var(--teal);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+    opacity: 0.9;
+  }
+
+  .lobby-card {
+    background: rgba(255,248,240,0.06);
+    border: 1.5px solid rgba(245,216,122,0.25);
+    border-radius: 24px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 480px;
+    backdrop-filter: blur(10px);
+  }
+  .lobby-card h2 {
+    font-family: 'Boogaloo', cursive;
+    font-size: 1.6rem;
+    color: var(--sand);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .player-count-row {
+    display: flex; gap: 10px; margin-bottom: 1.5rem; justify-content: center;
+  }
+  .count-btn {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 2px solid rgba(245,216,122,0.3);
+    background: transparent;
+    color: var(--white);
+    font-family: 'Boogaloo', cursive;
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .count-btn:hover { border-color: var(--sand); color: var(--sand); transform: scale(1.1); }
+  .count-btn.selected { background: var(--sand); color: var(--jungle2); border-color: var(--sand); transform: scale(1.1); }
+
+  .player-inputs { display: flex; flex-direction: column; gap: 12px; margin-bottom: 1.5rem; }
+  .player-input-row {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .player-dot {
+    width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+  }
+  .player-input-row input {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(245,216,122,0.2);
+    border-radius: 12px;
+    padding: 10px 14px;
+    color: var(--white);
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .player-input-row input:focus { border-color: var(--sand); }
+  .player-input-row input::placeholder { color: rgba(255,248,240,0.35); font-weight: 400; }
+
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    border-radius: 16px;
+    border: none;
+    background: linear-gradient(135deg, var(--fire), var(--fire2));
+    color: white;
+    font-family: 'Boogaloo', cursive;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 20px rgba(255,107,26,0.4);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(255,107,26,0.55); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ══════════════════════════════════
+     GAME SCREEN
+  ══════════════════════════════════ */
+  #game {
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: rgba(0,0,0,0.35);
+    border-bottom: 1px solid rgba(245,216,122,0.15);
+    flex-shrink: 0;
+  }
+  .topbar-title {
+    font-family: 'Boogaloo', cursive;
+    font-size: 1.5rem;
+    color: var(--sand);
+  }
+  .turn-badge {
+    background: rgba(245,216,122,0.15);
+    border: 1px solid rgba(245,216,122,0.3);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--sand);
+  }
+  .current-player-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,107,26,0.15);
+    border: 1px solid rgba(255,107,26,0.35);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.9rem; font-weight: 700;
+  }
+  .cp-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* ── MAIN LAYOUT ── */
+  .game-layout {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    flex: 1;
+    gap: 0;
+    min-height: 0;
+  }
+
+  /* ── SCOREBOARD ── */
+  .scoreboard {
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(0,0,0,0.2);
+    border-right: 1px solid rgba(245,216,122,0.1);
+    overflow-y: auto;
+  }
+  .score-title {
+    font-family: 'Boogaloo', cursive;
+    font-size: 1.1rem;
+    color: var(--sand);
+    margin-bottom: 4px;
+  }
+  .player-score-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 10px 12px;
+    transition: all 0.3s;
+  }
+  .player-score-card.active-player {
+    border-color: var(--fire);
+    background: rgba(255,107,26,0.12);
+    box-shadow: 0 0 12px rgba(255,107,26,0.2);
+  }
+  .psc-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .psc-name { font-weight: 700; font-size: 0.9rem; flex: 1; }
+  .psc-score {
+    font-family: 'Boogaloo', cursive;
+    font-size: 1.3rem;
+    color: var(--sand);
+  }
+  .psc-tikis { display: flex; flex-wrap: wrap; gap: 4px; }
+  .mini-tiki {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    border: 1.5px solid rgba(255,255,255,0.3);
+  }
+  .mini-tiki.at-front { border-color: var(--sand); box-shadow: 0 0 6px rgba(245,216,122,0.5); }
+
+  /* ── BOARD TRACK ── */
+  .board-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px;
+    overflow-y: auto;
+    gap: 6px;
+  }
+
+  .track-container {
+    position: relative;
+    width: var(--track-w);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .finish-flag {
+    font-family: 'Boogaloo', cursive;
+    font-size: 0.75rem;
+    color: var(--sand);
+    text-align: center;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+
+  .track {
+    position: relative;
+    width: 36px;
+    background: linear-gradient(180deg, rgba(139,94,60,0.6), rgba(107,66,38,0.8));
+    border-radius: 6px;
+    border: 2px solid var(--wood2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .track-cell {
+    width: 100%;
+    height: 24px;
+    border-bottom: 1px solid rgba(107,66,38,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-size: 9px;
+    color: rgba(245,216,122,0.25);
+    font-family: 'Boogaloo', cursive;
+  }
+  .track-cell:last-child { border-bottom: none; }
+  .track-cell.has-tokens { overflow: visible; }
+
+  .track-pos-num {
+    position: absolute;
+    right: -22px;
+    font-size: 9px;
+    color: rgba(245,216,122,0.3);
+    font-family: 'Boogaloo', cursive;
+  }
+
+  /* ── TOKEN STACK ON TRACK ── */
+  .token-stack-on-track {
+    position: absolute;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 1px;
+    pointer-events: none;
+    transition: bottom 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  .track-token {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    border: 2px solid rgba(255,255,255,0.4);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    transition: transform 0.3s;
+    position: relative;
+  }
+  .track-token.top-token { border-color: var(--sand); }
+  .track-token.bounce {
+    animation: tokenBounce 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes tokenBounce {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.3) translateY(-6px); }
+    100% { transform: scale(1); }
+  }
+  .track-token.shuffle {
+    animation: tokenShuffle 0.4s ease-in-out;
+  }
+  @keyframes tokenShuffle {
+    0%,100% { transform: rotate(0deg); }
+    25% { transform: rotate(-15deg) scale(1.1); }
+    75% { transform: rotate(15deg) scale(1.1); }
+  }
+
+  /* ── STACK PANEL (right side) ── */
+  .stack-panel {
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(0,0,0,0.2);
+    border-left: 1px solid rgba(245,216,122,0.1);
+    overflow-y: auto;
+  }
+  .stack-title {
+    font-family: 'Boogaloo', cursive;
+    font-size: 1.1rem;
+    color: var(--sand);
+    margin-bottom: 4px;
+  }
+  .stack-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .stack-item {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 7px 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  .stack-item.top-1 { border-color: rgba(245,216,122,0.6); background: rgba(245,216,122,0.1); }
+  .stack-item.top-2 { border-color: rgba(245,216,122,0.35); }
+  .stack-item.top-3 { border-color: rgba(245,216,122,0.2); }
+  .stack-pos {
+    font-family: 'Boogaloo', cursive;
+    font-size: 1rem;
+    color: rgba(245,216,122,0.5);
+    width: 16px;
+    text-align: center;
+  }
+  .stack-emoji { font-size: 16px; }
+  .stack-owner { color: rgba(255,248,240,0.45); font-size: 0.75rem; }
+  .stack-board-pos {
+    margin-left: auto;
+    background: rgba(0,201,167,0.15);
+    border: 1px solid rgba(0,201,167,0.3);
+    border-radius: 8px;
+    padding: 2px 7px;
+    font-size: 0.75rem;
+    color: var(--teal);
+    font-family: 'Boogaloo', cursive;
+  }
+
+  /* ── ACTION PANEL ── */
+  .action-panel {
+    flex-shrink: 0;
+    padding: 12px 16px;
+    background: rgba(0,0,0,0.4);
+    border-top: 1px solid rgba(245,216,122,0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .action-title {
+    font-family: 'Boogaloo', cursive;
+    font-size: 1rem;
+    color: var(--sand);
+    text-align: center;
+  }
+  .action-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+  .action-btn {
+    padding: 9px 18px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Boogaloo', cursive;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.18s;
+    letter-spacing: 0.5px;
+  }
+  .action-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
+  .action-btn:hover:not(:disabled) { transform: translateY(-2px); }
+  .action-btn:active:not(:disabled) { transform: translateY(0) scale(0.97); }
+
+  .btn-move {
+    background: linear-gradient(135deg, #ff8c42, var(--fire2));
+    color: white;
+    box-shadow: 0 3px 12px rgba(255,107,26,0.35);
+  }
+  .btn-reorder {
+    background: linear-gradient(135deg, var(--teal), #00a896);
+    color: white;
+    box-shadow: 0 3px 12px rgba(0,201,167,0.35);
+  }
+  .btn-reorder.selecting {
+    background: linear-gradient(135deg, #f5d87a, #e8c55a);
+    color: var(--jungle2);
+    animation: pulse 1s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 3px 12px rgba(245,216,122,0.3); }
+    50% { box-shadow: 0 4px 20px rgba(245,216,122,0.6); }
+  }
+
+  .reorder-hint {
+    font-size: 0.8rem;
+    color: rgba(255,248,240,0.5);
+    text-align: center;
+    min-height: 18px;
+  }
+
+  /* Reorder selection UI */
+  .reorder-select-panel {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .reorder-select-panel.visible { display: flex; }
+  .reorder-token-btns { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  .reorder-token-btn {
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.06);
+    color: var(--white);
+    font-family: 'Boogaloo', cursive;
+    font-size: 1rem;
+    cursor: grab;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .reorder-token-btn:hover { border-color: var(--sand); background: rgba(245,216,122,0.1); }
+  .reorder-token-btn.in-order {
+    border-color: var(--teal);
+    background: rgba(0,201,167,0.15);
+  }
+
+  .new-order-display {
+    display: flex; gap: 6px; align-items: center; justify-content: center;
+    flex-wrap: wrap;
+  }
+  .new-order-token {
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-family: 'Boogaloo', cursive;
+    font-size: 0.95rem;
+    display: flex; align-items: center; gap: 4px;
+    cursor: pointer;
+  }
+  .new-order-token:hover { opacity: 0.7; }
+  .new-order-arrow { color: rgba(255,248,240,0.4); font-size: 0.9rem; }
+  .reorder-confirm-row { display: flex; gap: 8px; justify-content: center; }
+
+  /* ── LOG TICKER ── */
+  .log-ticker {
+    flex-shrink: 0;
+    padding: 6px 16px;
+    background: rgba(0,0,0,0.5);
+    border-top: 1px solid rgba(245,216,122,0.08);
+    font-size: 0.78rem;
+    color: rgba(255,248,240,0.45);
+    font-style: italic;
+    min-height: 28px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  /* ══════════════════════════════════
+     WIN SCREEN
+  ══════════════════════════════════ */
+  #winscreen {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    text-align: center;
+  }
+  .win-title {
+    font-family: 'Boogaloo', cursive;
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    color: var(--sand);
+    text-shadow: 3px 3px 0 var(--wood2);
+    animation: winPop 0.6s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes winPop {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .win-winner-name {
+    font-family: 'Boogaloo', cursive;
+    font-size: clamp(1.8rem, 6vw, 3.5rem);
+    color: var(--fire);
+    margin: 0.3em 0 0.1em;
+  }
+  .win-score { color: var(--teal); font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; }
+  .win-leaderboard {
+    background: rgba(255,248,240,0.06);
+    border: 1.5px solid rgba(245,216,122,0.2);
+    border-radius: 20px;
+    padding: 1.5rem 2rem;
+    min-width: 300px;
+    max-width: 420px;
+    margin: 0 auto 2rem;
+  }
+  .win-leaderboard h3 {
+    font-family: 'Boogaloo', cursive;
+    color: var(--sand);
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+  .win-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,248,240,0.08);
+    font-weight: 700;
+  }
+  .win-row:last-child { border-bottom: none; }
+  .win-rank {
+    font-family: 'Boogaloo', cursive;
+    font-size: 1.3rem;
+    width: 28px; text-align: center;
+  }
+  .win-rank.gold { color: #ffd700; }
+  .win-rank.silver { color: #c0c0c0; }
+  .win-rank.bronze { color: #cd7f32; }
+  .win-pname { flex: 1; text-align: left; }
+  .win-pts {
+    font-family: 'Boogaloo', cursive;
+    font-size: 1.3rem;
+    color: var(--sand);
+  }
+
+  /* ── CONFETTI ── */
+  .confetti-piece {
+    position: fixed;
+    width: 10px; height: 10px;
+    animation: confettiFall linear forwards;
+    pointer-events: none;
+    z-index: 999;
+    border-radius: 2px;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 90px; left: 50%; transform: translateX(-50%);
+    background: rgba(20,40,20,0.92);
+    border: 1px solid rgba(245,216,122,0.3);
+    border-radius: 14px;
+    padding: 10px 20px;
+    font-size: 0.9rem; font-weight: 700;
+    color: var(--white);
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ── LOADING ── */
+  .loading-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(10,20,10,0.7);
+    z-index: 200;
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 12px;
+  }
+  .loading-overlay.show { display: flex; }
+  .spinner {
+    width: 44px; height: 44px;
+    border: 3px solid rgba(245,216,122,0.2);
+    border-top-color: var(--sand);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .game-layout { grid-template-columns: 0px auto 1fr; }
+    .scoreboard { display: none; }
+    .stack-panel { padding: 10px 8px; }
+  }
+  @media (max-width: 400px) {
+    .game-layout { grid-template-columns: auto 1fr; }
+    .stack-panel { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ LOBBY ══ -->
+<div id="lobby" class="screen active">
+  <div class="logo">🗿 Tiki Topple</div>
+  <div class="logo-sub">The Tactical Game of Totem Domination</div>
+
+  <div class="lobby-card">
+    <h2>Start a New Game</h2>
+
+    <div style="text-align:center; margin-bottom:10px; font-size:0.85rem; color:rgba(255,248,240,0.5);">
+      Number of Players
+    </div>
+    <div class="player-count-row" id="countRow">
+      <button class="count-btn selected" data-count="2" onclick="setPlayerCount(2)">2</button>
+      <button class="count-btn" data-count="3" onclick="setPlayerCount(3)">3</button>
+      <button class="count-btn" data-count="4" onclick="setPlayerCount(4)">4</button>
+    </div>
+
+    <div class="player-inputs" id="playerInputs"></div>
+
+    <button class="btn-primary" id="startBtn" onclick="startGame()">🔥 Begin the Ritual!</button>
+  </div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div id="game" class="screen">
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-title">🗿 Tiki Topple</div>
+    <div class="turn-badge" id="turnBadge">Turn 1</div>
+    <div class="current-player-badge" id="cpBadge">
+      <div class="cp-dot" id="cpDot" style="background:#fff"></div>
+      <span id="cpName">—</span>'s turn
+    </div>
+  </div>
+
+  <!-- Main layout -->
+  <div class="game-layout">
+
+    <!-- Left: Scoreboard -->
+    <div class="scoreboard" id="scoreboard">
+      <div class="score-title">🏆 Scores</div>
+    </div>
+
+    <!-- Center: Track -->
+    <div class="board-area" id="boardArea">
+      <div class="finish-flag">🏁 FINISH</div>
+      <div class="track-container" id="trackContainer">
+        <div class="track" id="track"></div>
+      </div>
+      <div class="finish-flag" style="margin-top:4px; opacity:0.5;">START</div>
+    </div>
+
+    <!-- Right: Stack -->
+    <div class="stack-panel" id="stackPanel">
+      <div class="stack-title">📚 Stack</div>
+      <div class="stack-list" id="stackList"></div>
+    </div>
+
+  </div>
+
+  <!-- Action panel -->
+  <div class="action-panel">
+    <div class="action-title" id="actionTitle">Choose your action</div>
+
+    <!-- Normal action row -->
+    <div class="action-row" id="normalActions">
+      <button class="action-btn btn-move" onclick="doMove(1)">Move 1 🗿</button>
+      <button class="action-btn btn-move" onclick="doMove(2)">Move 2 🗿🗿</button>
+      <button class="action-btn btn-move" onclick="doMove(3)">Move 3 🗿🗿🗿</button>
+      <button class="action-btn btn-reorder" id="reorderStartBtn" onclick="startReorder()">Reorder 🔀</button>
+    </div>
+    <div class="reorder-hint" id="reorderHint"></div>
+
+    <!-- Reorder selection panel -->
+    <div class="reorder-select-panel" id="reorderPanel">
+      <div style="text-align:center; font-size:0.82rem; color:rgba(255,248,240,0.5);">
+        Tap tokens to build new order (top → bottom):
+      </div>
+      <div class="reorder-token-btns" id="reorderTokenBtns"></div>
+      <div style="font-size:0.78rem; text-align:center; color:rgba(255,248,240,0.4);">
+        New order (tap to remove):
+      </div>
+      <div class="new-order-display" id="newOrderDisplay"></div>
+      <div class="reorder-confirm-row">
+        <button class="action-btn btn-reorder" id="confirmReorderBtn" onclick="confirmReorder()" disabled>
+          ✅ Confirm Reorder
+        </button>
+        <button class="action-btn" style="background:rgba(255,255,255,0.1); color:var(--white);" onclick="cancelReorder()">
+          ✖ Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log ticker -->
+  <div class="log-ticker" id="logTicker">Welcome to Tiki Topple! 🗿 The island awaits...</div>
+</div>
+
+<!-- ══ WIN SCREEN ══ -->
+<div id="winscreen" class="screen">
+  <div class="win-title">🏆 Game Over!</div>
+  <div class="win-winner-name" id="winName">—</div>
+  <div class="win-score" id="winScore">wins with 0 points!</div>
+  <div class="win-leaderboard">
+    <h3>Final Rankings</h3>
+    <div id="winLeaderboard"></div>
+  </div>
+  <button class="btn-primary" style="max-width:280px" onclick="resetGame()">🔄 Play Again</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div style="color:var(--sand); font-family:'Boogaloo',cursive; font-size:1.1rem;">Contacting the island...</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════
+const API = https://tiki-topple.onrender.com/api
+
+// Player colors for UI
+const PLAYER_COLORS = ['#e74c3c','#3498db','#2ecc71','#f1c40f'];
+
+// ══════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════
+let gameId = null;
+let gameState = null;
+let myPlayerId = null;       // for this demo, player1 always
+let isReordering = false;
+let reorderTopN = 2;
+let newOrderSelection = [];  // tiki IDs in order picked
+
+// ══════════════════════════════════════════════════════
+//  SOUND ENGINE  (Web Audio API — no library needed)
+// ══════════════════════════════════════════════════════
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let ctx = null;
+function getAudioCtx() {
+  if (!ctx) ctx = new AudioCtx();
+  return ctx;
+}
+
+function playTone(freq, type, duration, vol=0.3) {
+  try {
+    const ac = getAudioCtx();
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ac.currentTime);
+    gain.gain.setValueAtTime(vol, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + duration);
+    osc.start(); osc.stop(ac.currentTime + duration);
+  } catch(e){}
+}
+
+function playDrum() {
+  try {
+    const ac = getAudioCtx();
+    const buf = ac.createBuffer(1, ac.sampleRate * 0.15, ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random()*2-1) * Math.pow(1 - i/data.length, 3);
+    }
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    const gain = ac.createGain();
+    gain.gain.setValueAtTime(0.5, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.15);
+    src.connect(gain); gain.connect(ac.destination);
+    src.start();
+  } catch(e){}
+}
+
+const SFX = {
+  move:    () => { playDrum(); setTimeout(()=>playTone(440,'sine',0.1,0.2),60); },
+  reorder: () => { playTone(300,'triangle',0.08,0.15); playTone(450,'triangle',0.08,0.15); playTone(600,'triangle',0.12,0.2); },
+  win:     () => {
+    [523,659,784,1047].forEach((f,i) => setTimeout(()=>playTone(f,'sine',0.4,0.35), i*120));
+  },
+  error:   () => { playTone(200,'sawtooth',0.15,0.2); },
+  click:   () => { playTone(800,'sine',0.06,0.12); },
+};
+
+// ══════════════════════════════════════════════════════
+//  LOBBY
+// ══════════════════════════════════════════════════════
+let numPlayers = 2;
+const defaultNames = ['Alice','Bob','Charlie','Diana'];
+
+function setPlayerCount(n) {
+  numPlayers = n;
+  document.querySelectorAll('.count-btn').forEach(b => b.classList.toggle('selected', +b.dataset.count === n));
+  renderPlayerInputs();
+  SFX.click();
+}
+
+function renderPlayerInputs() {
+  const c = document.getElementById('playerInputs');
+  c.innerHTML = '';
+  for (let i = 0; i < numPlayers; i++) {
+    c.innerHTML += `
+      <div class="player-input-row">
+        <div class="player-dot" style="background:${PLAYER_COLORS[i]}"></div>
+        <input id="pname${i}" type="text" placeholder="${defaultNames[i]}" value="${defaultNames[i]}" maxlength="14"/>
+      </div>`;
+  }
+}
+
+renderPlayerInputs();
+
+async function startGame() {
+  SFX.click();
+  const players = [];
+  for (let i = 0; i < numPlayers; i++) {
+    const v = document.getElementById(`pname${i}`).value.trim();
+    players.push(v || defaultNames[i]);
+  }
+
+  showLoading(true);
+  try {
+    const res = await fetch(`${API}/games`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ players })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    gameId = data.game.gameId;
+    gameState = data.game;
+    showScreen('game');
+    renderGame();
+    SFX.move();
+  } catch(e) {
+    SFX.error();
+    showToast('❌ Could not connect to server. Is it running on port 3001?', 4000);
+  }
+  showLoading(false);
+}
+
+// ══════════════════════════════════════════════════════
+//  GAME ACTIONS
+// ══════════════════════════════════════════════════════
+async function doMove(count) {
+  if (!gameState || gameState.status !== 'active') return;
+  SFX.click();
+  const playerId = gameState.currentPlayerId;
+
+  showLoading(true);
+  try {
+    const res = await fetch(`${API}/games/${gameId}/action/move`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ playerId, count })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    gameState = data.game;
+    SFX.move();
+    animateMoveTokens(count);
+    setTimeout(() => { renderGame(); showLoading(false); }, 400);
+  } catch(e) {
+    SFX.error();
+    showToast('⚠️ ' + e.message);
+    showLoading(false);
+  }
+}
+
+// ── REORDER UI ──
+function startReorder() {
+  SFX.click();
+  isReordering = true;
+  newOrderSelection = [];
+  reorderTopN = Math.min(3, gameState.stack.length);
+
+  document.getElementById('normalActions').style.display = 'none';
+  document.getElementById('reorderPanel').classList.add('visible');
+  document.getElementById('reorderStartBtn').classList.add('selecting');
+
+  renderReorderPanel();
+}
+
+function renderReorderPanel() {
+  const top = gameState.stack.slice(0, reorderTopN);
+  const tikisData = gameState.tikisData;
+
+  // Build token buttons
+  const btns = document.getElementById('reorderTokenBtns');
+  btns.innerHTML = '';
+  top.forEach(tikId => {
+    const t = tikisData.find(x => x.id === tikId) || { emoji:'🗿', name: tikId };
+    const inOrder = newOrderSelection.includes(tikId);
+    btns.innerHTML += `
+      <button class="reorder-token-btn ${inOrder?'in-order':''}" onclick="addToOrder('${tikId}')">
+        <span style="font-size:16px">${t.emoji}</span> ${t.name.replace(' Tiki','')}
+      </button>`;
+  });
+
+  // Show new order
+  const disp = document.getElementById('newOrderDisplay');
+  disp.innerHTML = '';
+  newOrderSelection.forEach((tikId, i) => {
+    const t = tikisData.find(x => x.id === tikId) || { emoji:'🗿', color:'#888', name: tikId };
+    if (i > 0) disp.innerHTML += `<span class="new-order-arrow">→</span>`;
+    disp.innerHTML += `
+      <div class="new-order-token" style="background:${t.color}22; border:1px solid ${t.color}55;"
+           onclick="removeFromOrder('${tikId}')">
+        ${t.emoji} ${t.name.replace(' Tiki','')}
+      </div>`;
+  });
+
+  const confirmBtn = document.getElementById('confirmReorderBtn');
+  confirmBtn.disabled = newOrderSelection.length < 2;
+
+  // Update hint
+  document.getElementById('reorderHint').textContent =
+    newOrderSelection.length === 0 ? `Pick top ${reorderTopN} in your desired order` :
+    newOrderSelection.length < 2   ? `Pick ${2 - newOrderSelection.length} more...` :
+    newOrderSelection.length < top.length ? `Add 1 more or confirm` : 'Ready to confirm!';
+}
+
+function addToOrder(tikId) {
+  if (newOrderSelection.includes(tikId)) return;
+  const top = gameState.stack.slice(0, reorderTopN);
+  if (newOrderSelection.length >= top.length) return;
+  SFX.click();
+  newOrderSelection.push(tikId);
+  renderReorderPanel();
+}
+
+function removeFromOrder(tikId) {
+  SFX.click();
+  newOrderSelection = newOrderSelection.filter(x => x !== tikId);
+  renderReorderPanel();
+}
+
+async function confirmReorder() {
+  // If user picked 2 out of 3, fill remaining
+  const top = gameState.stack.slice(0, reorderTopN);
+  const remaining = top.filter(t => !newOrderSelection.includes(t));
+  const finalOrder = [...newOrderSelection, ...remaining];
+
+  if (finalOrder.length < 2) { SFX.error(); return; }
+
+  SFX.reorder();
+  const playerId = gameState.currentPlayerId;
+
+  cancelReorder();
+  showLoading(true);
+  try {
+    const res = await fetch(`${API}/games/${gameId}/action/reorder`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ playerId, newOrder: finalOrder })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    gameState = data.game;
+    animateReorderTokens();
+    setTimeout(() => { renderGame(); showLoading(false); }, 450);
+  } catch(e) {
+    SFX.error();
+    showToast('⚠️ ' + e.message);
+    showLoading(false);
+    renderGame();
+  }
+}
+
+function cancelReorder() {
+  isReordering = false;
+  newOrderSelection = [];
+  document.getElementById('normalActions').style.display = 'flex';
+  document.getElementById('reorderPanel').classList.remove('visible');
+  document.getElementById('reorderStartBtn').classList.remove('selecting');
+  document.getElementById('reorderHint').textContent = '';
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════════════
+function renderGame() {
+  if (!gameState) return;
+  const g = gameState;
+
+  // Check game over
+  if (g.status === 'finished') {
+    showWinScreen(g);
+    return;
+  }
+
+  // Top bar
+  document.getElementById('turnBadge').textContent = `Turn ${g.turn} / ${g.maxTurns}`;
+  const cp = g.players.find(p => p.id === g.currentPlayerId);
+  document.getElementById('cpName').textContent = cp ? cp.name : '—';
+  document.getElementById('cpDot').style.background = cp ? cp.color : '#fff';
+  document.getElementById('actionTitle').textContent = `${cp ? cp.name : '?'}'s turn — pick an action`;
+
+  // Scoreboard
+  renderScoreboard(g);
+
+  // Board track
+  renderTrack(g);
+
+  // Stack list
+  renderStackList(g);
+
+  // Log
+  const lastLog = g.lastAction;
+  if (lastLog) {
+    const lastEntry = g.log ? g.log[g.log.length - 1] : null;
+    if (lastEntry) document.getElementById('logTicker').textContent = `🗿 ${lastEntry.msg}`;
+  }
+}
+
+function renderScoreboard(g) {
+  const sb = document.getElementById('scoreboard');
+  const title = sb.querySelector('.score-title');
+  sb.innerHTML = '';
+  sb.appendChild(title);
+
+  g.players.forEach(p => {
+    const isActive = p.id === g.currentPlayerId;
+    const tikisData = g.tikisData || [];
+    const card = document.createElement('div');
+    card.className = 'player-score-card' + (isActive ? ' active-player' : '');
+
+    // Compute live score
+    const ranked = [...Object.keys(g.boardPositions)].sort((a,b) => g.boardPositions[b] - g.boardPositions[a]);
+    const scoreMap = [10,8,6,5,4,3,2,1,0];
+    let score = 0;
+    ranked.forEach((tid, i) => {
+      if (p.tikis.includes(tid)) score += (scoreMap[i] || 0);
+    });
+
+    const tikisHtml = p.tikis.map(tid => {
+      const t = tikisData.find(x => x.id === tid) || { emoji:'🗿', color:'#888' };
+      const pos = g.boardPositions[tid] || 0;
+      const atFront = pos >= g.boardSize * 0.8;
+      return `<div class="mini-tiki ${atFront?'at-front':''}" style="background:${t.color}33; border-color:${t.color}88; color:${t.color}" title="${tid} @ pos ${pos}">${t.emoji}</div>`;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="psc-top">
+        <div style="width:10px;height:10px;border-radius:50%;background:${p.color};flex-shrink:0"></div>
+        <div class="psc-name">${p.name}</div>
+        <div class="psc-score">${score}</div>
+      </div>
+      <div class="psc-tikis">${tikisHtml}</div>`;
+    sb.appendChild(card);
+  });
+}
+
+let trackCells = [];
+function renderTrack(g) {
+  const track = document.getElementById('track');
+  const BOARD_SIZE = g.boardSize || 35;
+
+  // Build cells once
+  if (!trackCells.length || track.children.length !== BOARD_SIZE + 1) {
+    track.innerHTML = '';
+    track.style.height = ((BOARD_SIZE + 1) * 24) + 'px';
+    for (let i = BOARD_SIZE; i >= 0; i--) {
+      const cell = document.createElement('div');
+      cell.className = 'track-cell';
+      cell.id = `cell-${i}`;
+      if (i % 5 === 0) {
+        const num = document.createElement('span');
+        num.className = 'track-pos-num';
+        num.textContent = i;
+        cell.appendChild(num);
+      }
+      track.appendChild(cell);
+      trackCells[i] = cell;
+    }
+  }
+
+  // Group tokens by position
+  const byPos = {};
+  g.stack.forEach((tikId, stackIdx) => {
+    const pos = g.boardPositions[tikId] || 0;
+    if (!byPos[pos]) byPos[pos] = [];
+    byPos[pos].push({ tikId, stackIdx });
+  });
+
+  // Remove old token stacks
+  track.querySelectorAll('.token-stack-on-track').forEach(el => el.remove());
+
+  // Place grouped stacks
+  Object.entries(byPos).forEach(([posStr, tokens]) => {
+    const pos = +posStr;
+    const cell = document.getElementById(`cell-${pos}`);
+    if (!cell) return;
+
+    const stackEl = document.createElement('div');
+    stackEl.className = 'token-stack-on-track';
+
+    // Position it in the cell
+    const cellTop = (BOARD_SIZE - pos) * 24;
+    stackEl.style.cssText = `
+      position:absolute;
+      bottom: ${(BOARD_SIZE - pos) * 24 - 12}px;
+      left: 50%; transform: translateX(-50%);
+      z-index: 5;
+    `;
+
+    // Render tokens in this position (bottom to top = last to first in stack)
+    tokens.slice().reverse().forEach(({ tikId, stackIdx }) => {
+      const t = (g.tikisData || []).find(x => x.id === tikId) || { emoji:'🗿', color:'#888' };
+      const div = document.createElement('div');
+      div.className = 'track-token' + (stackIdx === 0 ? ' top-token' : '');
+      div.style.cssText = `background:${t.color}; border-color: ${stackIdx < 3 ? t.color : 'rgba(255,255,255,0.2)'};`;
+      div.id = `tt-${tikId}`;
+      div.textContent = t.emoji;
+      div.title = `${t.name} (pos ${pos})`;
+      stackEl.appendChild(div);
+    });
+
+    track.appendChild(stackEl);
+  });
+}
+
+function renderStackList(g) {
+  const list = document.getElementById('stackList');
+  list.innerHTML = '';
+  const tikisData = g.tikisData || [];
+
+  g.stack.slice(0, 9).forEach((tikId, i) => {
+    const t = tikisData.find(x => x.id === tikId) || { emoji:'🗿', color:'#888', name: tikId };
+    const owner = g.players.find(p => p.tikis.includes(tikId));
+    const pos = g.boardPositions[tikId] || 0;
+    const topClass = i < 3 ? `top-${i+1}` : '';
+
+    list.innerHTML += `
+      <div class="stack-item ${topClass}">
+        <div class="stack-pos">${i+1}</div>
+        <div style="width:18px;height:18px;border-radius:50%;background:${t.color};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px">${t.emoji}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:0.8rem;font-weight:700;color:${t.color}">${t.name.replace(' Tiki','')}</div>
+          <div class="stack-owner">${owner ? owner.name : '?'}</div>
+        </div>
+        <div class="stack-board-pos">${pos}</div>
+      </div>`;
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  ANIMATIONS
+// ══════════════════════════════════════════════════════
+function animateMoveTokens(count) {
+  if (!gameState) return;
+  gameState.stack.slice(0, count).forEach(tikId => {
+    const el = document.getElementById(`tt-${tikId}`);
+    if (el) { el.classList.remove('bounce'); void el.offsetWidth; el.classList.add('bounce'); }
+  });
+}
+
+function animateReorderTokens() {
+  if (!gameState) return;
+  gameState.stack.slice(0, 3).forEach(tikId => {
+    const el = document.getElementById(`tt-${tikId}`);
+    if (el) { el.classList.remove('shuffle'); void el.offsetWidth; el.classList.add('shuffle'); }
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  WIN SCREEN
+// ══════════════════════════════════════════════════════
+function showWinScreen(g) {
+  SFX.win();
+  showScreen('winscreen');
+
+  document.getElementById('winName').textContent =
+    (g.winner ? g.winner.name : 'Nobody') + ' wins!';
+  document.getElementById('winScore').textContent =
+    g.winner ? `with ${g.winner.score} points 🏆` : '';
+
+  // Leaderboard
+  const lb = document.getElementById('winLeaderboard');
+  lb.innerHTML = '';
+  const sorted = [...g.players].sort((a,b) => b.score - a.score);
+  const ranks = ['🥇','🥈','🥉'];
+  const rankClass = ['gold','silver','bronze'];
+  sorted.forEach((p, i) => {
+    lb.innerHTML += `
+      <div class="win-row">
+        <div class="win-rank ${rankClass[i]||''}">${ranks[i]||`#${i+1}`}</div>
+        <div style="width:10px;height:10px;border-radius:50%;background:${p.color}"></div>
+        <div class="win-pname">${p.name}</div>
+        <div class="win-pts">${p.score} pts</div>
+      </div>`;
+  });
+
+  spawnConfetti();
+}
+
+function spawnConfetti() {
+  const colors = ['#f5d87a','#ff6b1a','#00c9a7','#e74c3c','#3498db','#2ecc71','#9b59b6'];
+  for (let i = 0; i < 80; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `
+      left: ${Math.random()*100}vw;
+      background: ${colors[Math.floor(Math.random()*colors.length)]};
+      animation-duration: ${1.5 + Math.random()*2}s;
+      animation-delay: ${Math.random()*1.5}s;
+      width: ${6 + Math.random()*8}px;
+      height: ${6 + Math.random()*8}px;
+      border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+    `;
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+
+function resetGame() {
+  SFX.click();
+  gameId = null; gameState = null;
+  isReordering = false; newOrderSelection = [];
+  trackCells = [];
+  document.getElementById('track').innerHTML = '';
+  showScreen('lobby');
+}
+
+// ══════════════════════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showLoading(v) {
+  document.getElementById('loading').classList.toggle('show', v);
+}
+
+let toastTimer;
+function showToast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// Resume AudioContext on first user gesture
+document.addEventListener('click', () => {
+  try { if (ctx && ctx.state === 'suspended') ctx.resume(); } catch(e){}
+}, { once: false });
+</script>
+</body>
+</html>
